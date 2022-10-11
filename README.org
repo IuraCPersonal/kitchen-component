@@ -1,0 +1,146 @@
+#+TITLE: KITCHEN SERVER
+#+AUTHOR: FCIM FAF 203 Cius Iurie
+
+** INSTALLATION
+
+=!NOTE=: take the next steps only once, but I will put them in both component's =README= for better convenience.
+ 
+In order to run the docker servers using =docker compose= do the following steps:
+
+*** Linux/Unix
+
+1. Open your terminal and paste:
+
+  #+begin_src bash
+  $ mkdir restaurant-simulator
+
+  $ git clone https://github.com/IuraCPersonal/dining-hall-component restaurant-simulator/dining-hall-component
+  $ git clone https://github.com/IuraCPersonal/kitchen-component restaurant-simulator/kitchen-component
+
+  $ cd restaurant-simulator
+  $ touch docker-compose.yml
+  #+end_src
+
+2. Paste the following into the =docker-compose.yml= file.
+
+  #+begin_src yml
+  version: '3'
+
+  services:
+    kitchen:
+      build: ./kitchen-component
+      ports:
+        - "3000:3000"
+      environment:
+        - USING_DOCKER_COMPOSE=1
+    dining-hall:
+      build: ./dining-hall-component
+      ports: 
+        - "8080:8080"
+      environment:
+        - USING_DOCKER_COMPOSE=1
+  #+end_src
+
+3. Start the Docker service:
+
+  #+begin_src bash
+  $ sudo systemctl start docker
+  #+end_src
+
+4. Then run the command:
+
+  #+begin_src bash
+  $ sudo docker compose up --build
+  #+end_src
+
+*** Windows
+
+1. Create a folder =restaurant-simulator=.
+2. Open a Terminal/Git Bash in that folder.
+3. Paste the following line by line:
+
+    #+begin_src bash
+        $ git clone https://github.com/IuraCPersonal/dining-hall-component dining-hall-component
+        $ git clone https://github.com/IuraCPersonal/kitchen-component kitchen-component
+    #+end_src
+
+4. Create a new file =docker-compose.yml= in the =restaurant-simulator= folder.
+5. Add the following to the previously created file:
+
+    #+begin_src bash
+    version: '3'
+
+    services:
+      kitchen:
+	build: ./kitchen-component
+	ports:
+	  - "3000:3000"
+	environment:
+	  - USING_DOCKER_COMPOSE=1
+      dining-hall:
+	build: ./dining-hall-component
+	ports: 
+	  - "8080:8080"
+	environment:
+	  - USING_DOCKER_COMPOSE=1
+     #+end_src
+
+6. Make sure to have =Docker Desktop= started.
+7. Run
+
+    #+begin_src bash
+    $ docker-compose up --build
+    #+end_src
+
+
+** ABOUT
+
+The =Kitchen= has a finite =order list=. This =order list= is shared across all =kitchen= instances. All orders which kitchen receives have to be added to a single instance of =order-list=.
+
+Main work unit of the =Kitchen= are cooks. Their job is to take the =order= and "prepare" the menu item(s) from it, and return the orders as soon and with as little idle time as possible. Kitchen can prepare foods from different orders and it is not mandatory that one cook have to prepare entire order. Order is considered to be prepared when all foods from order list are prepared.
+
+*Each cook has the following characteristics:*
+
++ rank: which defines the complexity of the food that they can prepare (one caveat is that a cook can only take orders which his current rank or one rank lower that his current one):
+  + Line Cook ( rank = 1 )
+  + Saucier ( rank = 2 )
+  + Executive Chef (Chef de Cuisine) ( rank = 3 )
++ proficiency: it indicates on how may dishes he can work at once. It varies between 1 and 4 (and to follow a bit of logic, the higher the rank of a cook the higher is the probability that he can work on more dishes at the same time).
++ name
++ catch phrase
+
+So a cook could have the following definition:
+
+#+begin_src js
+{
+    "rank": 3,
+    "proficiency": 3,
+    "name": "Gordon Ramsay",
+    "catch-phrase": "Hey, panini head, are you listening to me?"
+}
+#+end_src
+
+** MORE DETAILS
+
+=The Kitchen= consists of =order list=, =cooks= and =cooking apparatus=. The order list should be a single instance which holds all orders received from Dinning Hall .
+
+=The Kitchen= should handle HTTP (POST) requests of receiving orders from the Dinning Hall and add received order to order list . For all received orders kitchen have to register time it was received and time is was totally prepared. =Cooking time= should be added to order before sending it back to =Dinning Hall=.
+
+=Cooks= should be an object instances which run their logic of preparing foods on separate threads , one thread per cook .
+
+Your task is to design a mechanism which will prepare orders by using =cooks= as work unit. It is up to you to decide how orders will be managed and how foods will be assigned to cooks in order to be prepared. Your main goal is to reduce preparation time of each order.
+
+=The kitchen= has a limited number of =cooking apparatus= and in our case we will use only stoves and ovens. =Cooking apparatus= should be object instances which work independently and in parallel. Cooking apparatus are sharable resources across all cooks and you have to carefully use them.
+
+Number and types of =cooks= and =cooking apparatus= should be configurable.
+
+When =order= is prepared, meaning that all foods from order are prepared. =Kitchen= should perform HTTP (POST) request with prepared order details to =Dinning Hall= in that way returning prepared order to be served to the table.
+
+** LINKS
+
+- [[https://github.com/IuraCPersonal/network-programming][Main Repository]]
+- [[https://github.com/IuraCPersonal/dining-hall-component][The Dining Hall Server]]
+
+** CONTACT
+
+If you have any question, please contact me through email: =iurie.cius@isa.utm.md=.
