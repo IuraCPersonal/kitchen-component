@@ -1,37 +1,46 @@
-import time, queue
+import sys
+import time
+import queue
 
 from app.modules import *
 from threading import Thread
-from app.helpers.SafePriorityQueue import SafePriorityQueue
+from app.helpers.OrderQueue import OrderQueue
+
 
 # Extend the Thread class to create Threads for the Cooks.
 class Cook(Thread):
     def __init__(self, cook_id, cook_rank, proficiency, *args, **kwargs):
-        super(Cook, self).__init__(
-            name=f'Cook-{cook_id}-{proficiency}', *args, **kwargs)
+        super(Cook, self).__init__(name=f'Cook-{cook_id}-{proficiency}', *args, **kwargs)
         self.cook_id = cook_id
         self.cook_rank = cook_rank
-
-    # def distribute_food(self, food):
-    #     while True:
-    #         try:
-    #             food = SafePriorityQueue.get_requires_cooking_aparatus(self.cook_rank)
-
-    #             if food['cooking_aparatus'] == 'oven':
-    #                 SafePriorityQueue._oven_queue.put(food)
-    #             elif food['cooking_aparatus'] == 'stove':
-    #                 SafePriorityQueue._stove_queue.put(food)
-    #         except queue.Empty:
-    #             break
-
+    
     # Overide the run() method of the Thread class.
     def run(self):
         while True:
-            food = SafePriorityQueue.unload(rank=self.cook_rank)
-            food["cook_id"] = self.cook_id
+            for complexity in range(self.cook_rank, 0, -1):
+                while True:
+                    try:
+                        food = OrderQueue.requires_cooking_apparatus[f'Rank-{complexity}'].get(block=False)
+                        food['cook_id'] = self.cook_id
 
-            # self.distribute_food(food)
+                        OrderQueue.cooking_apparatus[food['cooking_apparatus']].put(food)
+                    except queue.Empty:
+                        break
 
-            time.sleep(FOOD[food['food_id']]['preparation-time'] * TIME_UNIT)
+                OrderQueue.handle_ready_cooking_apparatus()
 
-            SafePriorityQueue.ready(food)
+                try:
+                    food = OrderQueue.rank_queue[f'Rank-{complexity}'].get(timeout=0.01*TIME_UNIT)
+                    food['cook_id'] = self.cook_id
+
+                    self.cook_food(food)
+                except queue.Empty:
+                    pass
+        
+    def cook_food(self, food):
+        preparation_time = FOOD[food['food_id']]['preparation-time'] * TIME_UNIT
+        
+        ctx_switch_time = preparation_time / CTX_SWITCH_FACTOR
+        time.sleep(ctx_switch_time)
+
+        OrderQueue.handle_ready_food(food)
