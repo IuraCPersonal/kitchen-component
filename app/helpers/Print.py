@@ -1,9 +1,7 @@
-import threading, time
+import threading
 
 from pprint import pprint
-from progress.bar import Bar
-from app.modules import FOOD
-from colorama import init, Fore, Back, Style
+from colorama import Fore, Back, Style
 
 class Print:
     __lock = threading.Lock()
@@ -14,9 +12,9 @@ class Print:
             print(f'[{Fore.GREEN}KN{Style.RESET_ALL}] {text}')
 
     @staticmethod
-    def order_received(content):
+    def order_recieved(content):
         with Print.__lock:
-            print(f'[{Fore.GREEN}KN{Style.RESET_ALL}] ORDER ({Fore.BLUE}{content["order_id"]}{Style.RESET_ALL}) received to KITCHEN. Cooking...')
+            print(f'[{Fore.GREEN}KN{Style.RESET_ALL}] ORDER ({Fore.BLUE}{content["order_id"]}{Style.RESET_ALL}) recieved to KITCHEN. Cooking...')
             pprint(content)
 
     @staticmethod

@@ -1,3 +1,5 @@
+import os
+
 # Create a Thread-Safe Queue
 threads = dict()
 
@@ -107,6 +109,23 @@ FOOD = {
         "preparation-time": 30,
         "complexity": 2,
         "cooking-apparatus": "oven"
+    }
+}
+
+RESTAURANT_ID = int(os.getenv('RESTAURANT_ID'))
+
+RESTAURANT_CFG = {
+    1: {
+        'name': 'McDonald\'s',
+        'HOST_NAME': '0.0.0.0',
+        'DINING_HALL_PORT': 6666,
+        'menu': FOOD
+    },
+    2: {
+        'name': 'KFC',
+        'HOST_NAME': '0.0.0.0',
+        'DINING_HALL_PORT': 6667,
+        'menu': FOOD
     }
 }
 
