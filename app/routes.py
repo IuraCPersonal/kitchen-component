@@ -13,6 +13,6 @@ def order():
     OrderQueue.add_new_order(content)
 
     # DEBUG:
-    Print.order_received(content)
+    Print.order_recieved(content)
 
     return json.dumps({'succes': True}), 200

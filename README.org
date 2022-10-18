@@ -11,19 +11,19 @@ In order to run the docker servers using =docker compose= do the following steps
 
 1. Open your terminal and paste:
 
-  #+begin_src bash
-  $ mkdir restaurant-simulator
+#+begin_src bash
+mkdir restaurant-simulator
 
-  $ git clone https://github.com/IuraCPersonal/dining-hall-component restaurant-simulator/dining-hall-component
-  $ git clone https://github.com/IuraCPersonal/kitchen-component restaurant-simulator/kitchen-component
+git clone https://github.com/IuraCPersonal/dining-hall-component restaurant-simulator/dining-hall-component
+git clone https://github.com/IuraCPersonal/kitchen-component restaurant-simulator/kitchen-component
 
-  $ cd restaurant-simulator
-  $ touch docker-compose.yml
-  #+end_src
+cd restaurant-simulator
+touch docker-compose.yml
+#+end_src
 
 2. Paste the following into the =docker-compose.yml= file.
 
-  #+begin_src yml
+#+begin_src yml
   version: '3'
 
   services:
@@ -39,19 +39,19 @@ In order to run the docker servers using =docker compose= do the following steps
         - "8080:8080"
       environment:
         - USING_DOCKER_COMPOSE=1
-  #+end_src
+#+end_src
 
 3. Start the Docker service:
 
-  #+begin_src bash
-  $ sudo systemctl start docker
-  #+end_src
+#+begin_src bash
+sudo systemctl start docker
+#+end_src
 
 4. Then run the command:
 
-  #+begin_src bash
-  $ sudo docker compose up --build
-  #+end_src
+#+begin_src bash
+sudo docker compose up --build
+#+end_src
 
 *** Windows
 
@@ -59,38 +59,70 @@ In order to run the docker servers using =docker compose= do the following steps
 2. Open a Terminal/Git Bash in that folder.
 3. Paste the following line by line:
 
-    #+begin_src bash
-        $ git clone https://github.com/IuraCPersonal/dining-hall-component dining-hall-component
-        $ git clone https://github.com/IuraCPersonal/kitchen-component kitchen-component
-    #+end_src
+#+begin_src bash
+git clone https://github.com/IuraCPersonal/dining-hall-component dining-hall-component
+git clone https://github.com/IuraCPersonal/kitchen-component kitchen-component
+#+end_src
 
 4. Create a new file =docker-compose.yml= in the =restaurant-simulator= folder.
 5. Add the following to the previously created file:
 
-    #+begin_src bash
-    version: '3'
+#+begin_src bash
+version: '3'
 
-    services:
-      kitchen:
-	build: ./kitchen-component
-	ports:
-	  - "3000:3000"
-	environment:
-	  - USING_DOCKER_COMPOSE=1
-      dining-hall:
-	build: ./dining-hall-component
-	ports: 
-	  - "8080:8080"
-	environment:
-	  - USING_DOCKER_COMPOSE=1
-     #+end_src
+services:
+  kitchen_1:
+    build: ./kitchen-server
+    ports:
+      - "3111:3111"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+      - RESTAURANT_ID=1
+    depends_on: 
+      - restaurant-aggregator
+    
+  kitchen_2:
+    build: ./kitchen-server
+    ports:
+      - "3222:3222"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+      - RESTAURANT_ID=2
+    depends_on: 
+      - restaurant-aggregator
+
+  # dining-hall:
+  #   build: ./dining-hall-server
+  #   ports: 
+  #     - "8080:8080"
+  #   environment:
+  #     - USING_DOCKER_COMPOSE=1
+  
+  restaurant-aggregator:
+    build: ./restaurant-aggregator-server
+    ports:
+      - "7777:7777"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+      
+  client-server:
+    build: ./client-server
+    ports:
+      - "3333:3333"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+    depends_on: 
+      - restaurant-aggregator
+      - kitchen_1
+      - kitchen_2
+#+end_src
 
 6. Make sure to have =Docker Desktop= started.
 7. Run
 
-    #+begin_src bash
-    $ docker-compose up --build
-    #+end_src
+#+begin_src bash
+docker-compose up --build
+#+end_src
 
 
 ** ABOUT
@@ -119,6 +151,23 @@ So a cook could have the following definition:
     "catch-phrase": "Hey, panini head, are you listening to me?"
 }
 #+end_src
+
+*** KITCHEN_V2
+
+Register each Restaurant to the Aggregator.
+
+#+BEGIN_SRC python
+_ = requests.post(
+    url=f'http://restaurant-aggregator:7777/register',
+    json={
+        'restaurant_id': RESTAURANT_ID,
+        'name': RESTAURANT_CFG[RESTAURANT_ID]['name'],
+        'address': f'http://{RESTAURANT_CFG[RESTAURANT_ID]["HOST_NAME"]}:{RESTAURANT_CFG[RESTAURANT_ID]["DINING_HALL_PORT"]}',
+        'menu_items': len(RESTAURANT_CFG[RESTAURANT_ID]['menu']),
+        'menu': RESTAURANT_CFG[RESTAURANT_ID]['menu']
+    }
+)
+#+END_SRC
 
 ** MORE DETAILS
 

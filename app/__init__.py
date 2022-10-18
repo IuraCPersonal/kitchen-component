@@ -1,4 +1,6 @@
+import sys
 import logging
+import requests
 
 from flask import Flask
 from threading import Thread
@@ -9,9 +11,12 @@ from app.Cook import Cook
 from app.Stove import Stove
 
 
-# Disable Flask console messages.
+# Disable Flask console messages and start messsage.
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+
+cli = sys.modules['flask.cli']
+cli.show_server_banner = lambda *x: None
 
 # Setup Flask and other dependencies.
 app = Flask(__name__)
@@ -19,6 +24,17 @@ app = Flask(__name__)
 # Import flask routes.
 from app import routes
 
+# Register each Restaurant to the Aggregator.
+_ = requests.post(
+    url=f'http://restaurant-aggregator:7777/register',
+    json={
+        'restaurant_id': RESTAURANT_ID,
+        'name': RESTAURANT_CFG[RESTAURANT_ID]['name'],
+        'address': f'http://{RESTAURANT_CFG[RESTAURANT_ID]["HOST_NAME"]}:{RESTAURANT_CFG[RESTAURANT_ID]["DINING_HALL_PORT"]}',
+        'menu_items': len(RESTAURANT_CFG[RESTAURANT_ID]['menu']),
+        'menu': RESTAURANT_CFG[RESTAURANT_ID]['menu']
+    }
+)
 
 # Create the FLASK thread.
 threads['Flask'] = (

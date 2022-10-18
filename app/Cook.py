@@ -1,4 +1,3 @@
-import sys
 import time
 import queue
 
@@ -18,8 +17,10 @@ class Cook(Thread):
     def run(self):
         while True:
             for complexity in range(self.cook_rank, 0, -1):
+                # TODO: Find a better way to cook the foods. What food to cook first?
                 while True:
                     try:
+                        #TODO: Fix Priority Inversion in Order Queues.
                         food = OrderQueue.requires_cooking_apparatus[f'Rank-{complexity}'].get(block=False)
                         food['cook_id'] = self.cook_id
 
@@ -30,6 +31,7 @@ class Cook(Thread):
                 OrderQueue.handle_ready_cooking_apparatus()
 
                 try:
+                    #TODO: Fix Priority Inversion in Order Queues.
                     food = OrderQueue.rank_queue[f'Rank-{complexity}'].get(timeout=0.01*TIME_UNIT)
                     food['cook_id'] = self.cook_id
 
@@ -40,6 +42,7 @@ class Cook(Thread):
     def cook_food(self, food):
         preparation_time = FOOD[food['food_id']]['preparation-time'] * TIME_UNIT
         
+        # TODO: Implement the context switching.
         ctx_switch_time = preparation_time / CTX_SWITCH_FACTOR
         time.sleep(ctx_switch_time)
 
