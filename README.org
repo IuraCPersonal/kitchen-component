@@ -14,8 +14,7 @@ In order to run the docker servers using =docker compose= do the following steps
 #+begin_src bash
 mkdir restaurant-simulator
 
-git clone https://github.com/IuraCPersonal/dining-hall-component restaurant-simulator/dining-hall-component
-git clone https://github.com/IuraCPersonal/kitchen-component restaurant-simulator/kitchen-component
+I will add the links after I configure everything.
 
 cd restaurant-simulator
 touch docker-compose.yml
@@ -24,21 +23,53 @@ touch docker-compose.yml
 2. Paste the following into the =docker-compose.yml= file.
 
 #+begin_src yml
-  version: '3'
+version: '3'
 
-  services:
-    kitchen:
-      build: ./kitchen-component
-      ports:
-        - "3000:3000"
-      environment:
-        - USING_DOCKER_COMPOSE=1
-    dining-hall:
-      build: ./dining-hall-component
-      ports: 
-        - "8080:8080"
-      environment:
-        - USING_DOCKER_COMPOSE=1
+services:
+  kitchen_1:
+    build: ./kitchen-server
+    ports:
+      - "3111:3111"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+      - RESTAURANT_ID=1
+    depends_on: 
+      - restaurant-aggregator
+    
+  kitchen_2:
+    build: ./kitchen-server
+    ports:
+      - "3222:3222"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+      - RESTAURANT_ID=2
+    depends_on: 
+      - restaurant-aggregator
+
+  # dining-hall:
+  #   build: ./dining-hall-server
+  #   ports: 
+  #     - "8080:8080"
+  #   environment:
+  #     - USING_DOCKER_COMPOSE=1
+  
+  restaurant-aggregator:
+    build: ./restaurant-aggregator-server
+    ports:
+      - "7777:7777"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+      
+  client-server:
+    build: ./client-server
+    ports:
+      - "3333:3333"
+    environment:
+      - USING_DOCKER_COMPOSE=1
+    depends_on: 
+      - restaurant-aggregator
+      - kitchen_1
+      - kitchen_2
 #+end_src
 
 3. Start the Docker service:
@@ -60,8 +91,7 @@ sudo docker compose up --build
 3. Paste the following line by line:
 
 #+begin_src bash
-git clone https://github.com/IuraCPersonal/dining-hall-component dining-hall-component
-git clone https://github.com/IuraCPersonal/kitchen-component kitchen-component
+I will add the links after I configure everything.
 #+end_src
 
 4. Create a new file =docker-compose.yml= in the =restaurant-simulator= folder.
