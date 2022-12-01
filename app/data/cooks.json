@@ -1,0 +1,28 @@
+{
+    "cooks": {
+        "1": {
+            "rank": 3,
+            "proficiency": 4,
+            "name": null,
+            "catchphrase": null
+        },
+        "2": {
+            "rank": 2,
+            "proficiency": 3,
+            "name": null,
+            "catchphrase": null
+        },
+        "3": {
+            "rank": 2,
+            "proficiency": 2,
+            "name": null,
+            "catchphrase": null
+        },
+        "4": {
+            "rank": 1,
+            "proficiency": 2,
+            "name": null,
+            "catchphrase": null
+        }
+    }
+}

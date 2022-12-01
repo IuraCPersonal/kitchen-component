@@ -2,8 +2,8 @@ import json
 
 from app import app
 from flask import request
-from app.helpers.Print import Print
-from app.helpers.OrderQueue import OrderQueue
+from app.utils.Print import Print
+from app.utils.OrderQueue import OrderQueue
 
 
 # Setup the 'order' endpoint.

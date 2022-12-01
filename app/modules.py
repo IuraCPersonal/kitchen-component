@@ -1,157 +1,31 @@
-import os
+import os, json, queue
 
-# Create a Thread-Safe Queue
+
+# Function to read the content of a JSON file.
+def read_json(file):    
+    current_directory = os.getcwd()
+    with open(f'./{current_directory}/data/{file}', 'r') as f:
+        data = json.load(f)
+    
+    return data
+
+
 threads = dict()
+cooks = read_json('cooks.json').get('cooks')
+restaurants = read_json('restaurants.json').get('restaurants')
 
-TIME_UNIT = 1
 
-HOST_NAME = '0.0.0.0'
-DINING_HALL_PORT = 8080
-KITCHEN_PORT = 3000
-KITCHEN_HOSTNAME = "localhost"
+HOST_NAME = os.getenv('HOST_NAME')
+RESTAURANT_ID = os.getenv('RESTAURANT_ID')
 
-AMOUNT_OF_TABLES = 10
-AMOUNT_OF_COOKS = 4
+KITCHEN_PORT = restaurants.get(str(RESTAURANT_ID)).get('kitchen-port')
 
-AMOUNT_OF_STOVES = 1
-AMOUNT_OF_OVENS = 2
+TIME_UNIT = int(os.getenv('TIME_UNIT'))
+CTX_SWITCH_FACTOR = int(os.getenv('CTX_SWITCH_FACTOR'))
 
-CTX_SWITCH_FACTOR = 5
+AMOUNT_OF_COOKS = int(os.getenv('AMOUNT_OF_COOKS'))
 
-FOOD = {
-    1: {
-        "id": 1,
-        "name": "pizza",
-        "preparation-time": 20,
-        "complexity": 2,
-        "cooking-apparatus": "oven"
-    },
-    2: {
-        "id": 2,
-        "name": "salad",
-        "preparation-time": 10,
-        "complexity": 1,
-        "cooking-apparatus": None
-    },
-    3: {
-        "id": 3,
-        "name": "zeama",
-        "preparation-time": 7,
-        "complexity": 1,
-        "cooking-apparatus": "stove"
-    },
-    4: {
-        "id": 4,
-        "name": "Scallop Sashimi with Meyer Lemon Confit",
-        "preparation-time": 32,
-        "complexity": 3,
-        "cooking-apparatus": None
-    },
-    5: {
-        "id": 5,
-        "name": "Island Duck with Mulberry Mustard",
-        "preparation-time": 35,
-        "complexity": 3,
-        "cooking-apparatus": "oven"
-    },
-    6: {
-        "id": 6,
-        "name": "Waffles",
-        "preparation-time": 10,
-        "complexity": 1,
-        "cooking-apparatus": "stove"
-    },
-    7: {
-        "id": 7,
-        "name": "Aubergine",
-        "preparation-time": 20,
-        "complexity": 2,
-        "cooking-apparatus": "oven"
-    },
-    8: {
-        "id": 8,
-        "name": "Lasagna",
-        "preparation-time": 30,
-        "complexity": 2,
-        "cooking-apparatus": "oven"
-    },
-    9: {
-        "id": 9,
-        "name": "Burger",
-        "preparation-time": 15,
-        "complexity": 1,
-        "cooking-apparatus": "stove"
-    },
-    10: {
-        "id": 10,
-        "name": "Gyros",
-        "preparation-time": 15,
-        "complexity": 1,
-        "cooking-apparatus": None
-    },
-    11: {
-        "id": 11,
-        "name": "Kebab",
-        "preparation-time": 15,
-        "complexity": 1,
-        "cooking-apparatus": None
-    },
-    12: {
-        "id": 12,
-        "name": "Unagi Maki",
-        "preparation-time": 20,
-        "complexity": 2,
-        "cooking-apparatus": None
-    },
-    13: {
-        "id": 13,
-        "name": "Tobacco Chicken",
-        "preparation-time": 30,
-        "complexity": 2,
-        "cooking-apparatus": "oven"
-    }
-}
+AMOUNT_OF_STOVES = int(os.getenv('AMOUNT_OF_STOVES'))
+AMOUNT_OF_OVENS = int(os.getenv('AMOUNT_OF_OVENS'))
 
-RESTAURANT_ID = int(os.getenv('RESTAURANT_ID'))
 
-RESTAURANT_CFG = {
-    1: {
-        'name': 'McDonald\'s',
-        'HOST_NAME': '0.0.0.0',
-        'DINING_HALL_PORT': 6666,
-        'menu': FOOD
-    },
-    2: {
-        'name': 'KFC',
-        'HOST_NAME': '0.0.0.0',
-        'DINING_HALL_PORT': 6667,
-        'menu': FOOD
-    }
-}
-
-COOKS = {
-    1: {
-        "rank": 3,
-        "proficiency": 4,
-        "name": None,
-        "catchphrase": None
-    },
-    2: {
-        "rank": 2,
-        "proficiency": 3,
-        "name": None,
-        "catchphrase": None
-    },
-    3: {
-        "rank": 2,
-        "proficiency": 2,
-        "name": None,
-        "catchphrase": None
-    },
-    4: {
-        "rank": 1,
-        "proficiency": 2,
-        "name": None,
-        "catchphrase": None
-    }
-}

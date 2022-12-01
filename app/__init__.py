@@ -18,23 +18,14 @@ log.setLevel(logging.ERROR)
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 
+
 # Setup Flask and other dependencies.
 app = Flask(__name__)
+
 
 # Import flask routes.
 from app import routes
 
-# Register each Restaurant to the Aggregator.
-_ = requests.post(
-    url=f'http://restaurant-aggregator:7777/register',
-    json={
-        'restaurant_id': RESTAURANT_ID,
-        'name': RESTAURANT_CFG[RESTAURANT_ID]['name'],
-        'address': f'http://{RESTAURANT_CFG[RESTAURANT_ID]["HOST_NAME"]}:{RESTAURANT_CFG[RESTAURANT_ID]["DINING_HALL_PORT"]}',
-        'menu_items': len(RESTAURANT_CFG[RESTAURANT_ID]['menu']),
-        'menu': RESTAURANT_CFG[RESTAURANT_ID]['menu']
-    }
-)
 
 # Create the FLASK thread.
 threads['Flask'] = (
@@ -49,6 +40,7 @@ threads['Flask'] = (
     )
 )
 
+
 # Create the STOVE threads.
 for index in range(1, AMOUNT_OF_STOVES + 1):
     stove = Stove(index)
@@ -62,9 +54,10 @@ for index in range(1, AMOUNT_OF_OVENS + 1):
 # Create the COOK threads.
 for index in range(1, AMOUNT_OF_COOKS + 1):
     # According to the PROFICIENCY - create same types of cooks X times.
-    for proficiency in range(COOKS[index]['proficiency']):
-        cook = Cook(index, COOKS[index]['rank'], proficiency) 
+    for proficiency in range(cooks[f'{index}']['proficiency']):
+        cook = Cook(index, cooks[f'{index}']['rank'], proficiency) 
         threads[cook.name] = cook
+
 
 # Start the threads.
 for index, thread in enumerate(threads.values()):
